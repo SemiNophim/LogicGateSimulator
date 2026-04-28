@@ -26,6 +26,16 @@ Choose language: [Українська](#українська) | [English](#engl
 * CMake 3.16+
 * Qt6 SDK
 
+### Встановлення
+1. Клонування репозиторія:
+    ```bash
+    git clone https://github.com/SemiNophim/LogicGateSimulator.git
+3. Збірка проекту:
+    ```bash
+    mkdir build && cd build
+    cmake ..
+    make
+    
 ---
 
 ## English
@@ -52,8 +62,10 @@ Development of an interactive educational environment for visual modeling of dig
 
 ### Installation
 1. Clone the repository:
-   git clone https://github.com/SemiNophim/LogicGateSimulator.git
-2. Build the project:
-   mkdir build && cd build
-   cmake ..
-   make
+    ```bash
+    git clone https://github.com/SemiNophim/LogicGateSimulator.git
+3. Build the project:
+    ```bash
+    mkdir build && cd build
+    cmake ..
+    make
