@@ -1,6 +1,15 @@
-#include <iostream>
+#include <QApplication>
 
-int main(){
+#include "MainWindow.h"
+#include "LangInit.h"
 
-    return 0;
+int main(int argc, char *argv[]){
+    QApplication app(argc, argv);
+
+    registerLanguages();
+    
+    MainWindow window;
+    window.show();
+
+    return app.exec();
 }
