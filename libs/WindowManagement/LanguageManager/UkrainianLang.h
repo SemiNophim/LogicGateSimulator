@@ -18,5 +18,8 @@ public:
     // Settings 
     QString changeLangBtn() const override { return "Змінити мову"; }
 
+    // Constructor
+    QString conBtn() const override { return "Конструктор"; };
+
 };
 

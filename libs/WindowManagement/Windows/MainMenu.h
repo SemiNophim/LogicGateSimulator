@@ -13,14 +13,20 @@ public:
 
 signals:
     void switchToEducationalSection();
+    void switchToConstructor();
     void switchToSettings();
 
 private slots:
     void onEducationalSectionButtonClicked();
+    void onConstructorButtonClicked();
     void onSettingsButtonClicked();
 
 private:
     QPushButton *educationalSectionButton;
+    QPushButton *constructorButton;
     QPushButton *settingsButton;
+
+    void setupUI();
+    void setupConnections();
 };
 

@@ -14,6 +14,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
 
+# Directories
+set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/LogicGateSim")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
+
 # Custom libs
 add_subdirectory(
     libs/WindowManagement
@@ -29,3 +33,11 @@ target_link_libraries(LogicGateSimulator PRIVATE
     WindowManagement
 )
 
+# Translations
+add_custom_command(TARGET LogicGateSimulator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_DIR}/locales"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/locales"
+        "${OUTPUT_DIR}/locales"
+    COMMENT "Copying translation files to the output directory..."
+)

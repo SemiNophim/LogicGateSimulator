@@ -2,29 +2,23 @@
 
 #include <QWidget>
 #include <QPushButton>
-#include <QComboBox>
 
-class Settings : public QWidget {
+class Constructor : public QWidget {
     Q_OBJECT
-
 public:
-    explicit Settings(QWidget *parent = nullptr);
+    explicit Constructor(QWidget *parent = nullptr);
 
     void retranslateUI();
 
 signals:
     void switchToMainMenu();
-    void switchLang(int langIndex);
-
+    
 private slots:
     void onMainMenuButtonClicked();
-    void onChangeLangButtonClicked();
 
 private:
     QPushButton *mainMenuButton;
-    QPushButton *changeLangButton;
-    QComboBox *langBox;
-
+    
     void setupUI();
     void setupConnections();
 };

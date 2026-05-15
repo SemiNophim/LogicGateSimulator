@@ -5,6 +5,7 @@ set(WINDOW_SOURCES
     Windows/MainMenu.cpp
     Windows/EducationalSection.cpp
     Windows/Settings.cpp
+    Windows/Constructor.cpp
 
 )
 
@@ -13,6 +14,7 @@ set(WINDOW_HEADERS
     Windows/MainMenu.h
     Windows/EducationalSection.h
     Windows/Settings.h
+    Windows/Constructor.h
 
     # Languages
     LanguageManager/LangManager.h 

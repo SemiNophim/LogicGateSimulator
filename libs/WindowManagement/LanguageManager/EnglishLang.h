@@ -17,4 +17,8 @@ public:
 
     // Settings
     QString changeLangBtn() const override { return "Change language"; }
+
+    // Constructor
+    QString conBtn() const override { return "Constructor"; }
 };
+

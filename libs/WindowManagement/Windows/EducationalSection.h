@@ -20,5 +20,8 @@ private slots:
 
 private:
     QPushButton *mainMenuButton;
+
+    void setupUI();
+    void setupConnections();
 };
 

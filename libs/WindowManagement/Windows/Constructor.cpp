@@ -2,38 +2,37 @@
 #include <QGridLayout>
 #include <QPushButton>
 
-#include "EducationalSection.h"
+#include "Constructor.h"
 #include "LanguageManager/LangManager.h"
 
-EducationalSection::EducationalSection(QWidget *parent) : QWidget(parent) {
+Constructor::Constructor(QWidget *parent) : QWidget(parent){
     setupUI();
     retranslateUI();
     setupConnections();
 }
 
-void EducationalSection::onMainMenuButtonClicked(){
+void Constructor::onMainMenuButtonClicked(){
     emit switchToMainMenu();
 }
 
-void EducationalSection::retranslateUI(){
+void Constructor::retranslateUI(){
     auto &lang = LangManager::instance();
 
     mainMenuButton->setText(lang.get("mainMenuButton"));
 }
 
-void EducationalSection::setupUI(){
+void Constructor::setupUI(){
     auto *gridLayout = new QGridLayout(this);
 
     mainMenuButton = new QPushButton(this);
 
 
-    gridLayout->addWidget(mainMenuButton, 0, 0);
+    gridLayout->addWidget(mainMenuButton, 1, 1);
 
 }
 
-void EducationalSection::setupConnections(){
+void Constructor::setupConnections(){
     connect(mainMenuButton, &QPushButton::clicked,
-            this, &EducationalSection::onMainMenuButtonClicked);
+            this, &Constructor::onMainMenuButtonClicked);
 
 }
-

@@ -7,26 +7,17 @@
 #include "LanguageManager/LangManager.h"
 
 MainMenu::MainMenu(QWidget *parent) : QWidget(parent) {
-    auto *gridLayout = new QGridLayout(this);
-
-    // Language manager
-    auto *lang = LangManager::instance().current();
-
-    educationalSectionButton = new QPushButton(lang->eduSectionBtn(), this);
-    gridLayout->addWidget(educationalSectionButton, 0, 0);
-
-    settingsButton = new QPushButton(lang->settingsBtn(), this);
-    gridLayout->addWidget(settingsButton, 1,0);
-
-    connect(educationalSectionButton, &QPushButton::clicked,
-            this, &MainMenu::onEducationalSectionButtonClicked);
-
-    connect(settingsButton, &QPushButton::clicked,
-            this, &MainMenu::onSettingsButtonClicked);
+    setupUI();
+    retranslateUI();
+    setupConnections();
 }
 
 void MainMenu::onEducationalSectionButtonClicked(){
     emit switchToEducationalSection();
+}
+
+void MainMenu::onConstructorButtonClicked(){
+    emit switchToConstructor();
 }
 
 void MainMenu::onSettingsButtonClicked(){
@@ -34,9 +25,37 @@ void MainMenu::onSettingsButtonClicked(){
 }
 
 void MainMenu::retranslateUI(){
-    auto* lang = LangManager::instance().current();
+    auto &lang = LangManager::instance();
 
-    educationalSectionButton->setText(lang->eduSectionBtn());
-    settingsButton->setText(lang->settingsBtn());
+    educationalSectionButton->setText(lang.get("educationalSectionButton"));
+    constructorButton->setText(lang.get("constructorButton"));
+    settingsButton->setText(lang.get("settingsButton"));
+}
+
+void MainMenu::setupUI(){
+    auto *gridLayout = new QGridLayout(this);
+
+
+    educationalSectionButton = new QPushButton(this);
+    constructorButton = new QPushButton(this);
+    settingsButton = new QPushButton(this);
+    
+    gridLayout->addWidget(educationalSectionButton, 0, 0);
+    gridLayout->addWidget(constructorButton, 1, 0);
+    gridLayout->addWidget(settingsButton, 2, 0);
+
+
+}
+
+void MainMenu::setupConnections(){
+    connect(educationalSectionButton, &QPushButton::clicked,
+            this, &MainMenu::onEducationalSectionButtonClicked);
+
+    connect(constructorButton, &QPushButton::clicked,
+            this, &MainMenu::onConstructorButtonClicked);
+
+    connect(settingsButton, &QPushButton::clicked,
+            this, &MainMenu::onSettingsButtonClicked);
+
 }
 

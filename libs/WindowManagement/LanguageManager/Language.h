@@ -18,4 +18,7 @@ public:
     // Settings
     virtual QString changeLangBtn() const = 0;
 
+    // Constructor
+    virtual QString conBtn() const = 0;
+
 };
