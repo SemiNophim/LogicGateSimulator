@@ -15,16 +15,19 @@ signals:
     void switchToEducationalSection();
     void switchToConstructor();
     void switchToSettings();
+    void switchToLessonConstructor();
 
 private slots:
     void onEducationalSectionButtonClicked();
     void onConstructorButtonClicked();
     void onSettingsButtonClicked();
+    void onLessonConstructorButtonClicked();
 
 private:
     QPushButton *educationalSectionButton;
     QPushButton *constructorButton;
     QPushButton *settingsButton;
+    QPushButton *lessonConstructorButton;
 
     void setupUI();
     void setupConnections();

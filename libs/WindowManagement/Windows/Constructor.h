@@ -2,6 +2,10 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+
+#include "ConstructorScheme.h"
 
 class Constructor : public QWidget {
     Q_OBJECT
@@ -18,8 +22,15 @@ private slots:
 
 private:
     QPushButton *mainMenuButton;
+    QWidget *instrumentBar;
+    ConstructorScheme *c_scene;
+    QGraphicsView *c_view;
     
     void setupUI();
     void setupConnections();
+    void setupRules();
+    void testRect();
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
 

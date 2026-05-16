@@ -6,6 +6,8 @@ set(WINDOW_SOURCES
     Windows/EducationalSection.cpp
     Windows/Settings.cpp
     Windows/Constructor.cpp
+    Windows/LessonConstructor.cpp
+    Windows/ConstructorScheme.cpp
 
 )
 
@@ -15,12 +17,11 @@ set(WINDOW_HEADERS
     Windows/EducationalSection.h
     Windows/Settings.h
     Windows/Constructor.h
+    Windows/LessonConstructor.h
+    Windows/ConstructorScheme.h
 
     # Languages
     LanguageManager/LangManager.h 
-    LanguageManager/Language.h 
-    LanguageManager/EnglishLang.h 
-    LanguageManager/UkrainianLang.h
 
 )
 

@@ -6,6 +6,7 @@
 #include "Windows/EducationalSection.h"
 #include "Windows/Settings.h"
 #include "Windows/Constructor.h"
+#include "Windows/LessonConstructor.h"
 
 class MainWindow : public QWidget {
     Q_OBJECT
@@ -19,6 +20,7 @@ private:
     EducationalSection *m_eduPage;
     Settings *m_setPage;
     Constructor *m_conPage;
+    LessonConstructor *m_lesPage;
 
     void applyLanguage();
     void setupUI();

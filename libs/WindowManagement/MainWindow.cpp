@@ -7,6 +7,7 @@
 #include "Windows/MainMenu.h"
 #include "Windows/Settings.h"
 #include "Windows/Constructor.h"
+#include "Windows/LessonConstructor.h"
 
 #include "LanguageManager/LangManager.h"
 
@@ -21,6 +22,7 @@ void MainWindow::applyLanguage(){
     m_eduPage->retranslateUI();
     m_setPage->retranslateUI();
     m_conPage->retranslateUI();
+    m_lesPage->retranslateUI();
 }
 
 void MainWindow::setupUI(){
@@ -32,11 +34,13 @@ void MainWindow::setupUI(){
     m_eduPage = new EducationalSection(this);
     m_setPage = new Settings(this);
     m_conPage = new Constructor(this);
+    m_lesPage = new LessonConstructor(this);
 
     m_stackedWidget->addWidget(m_mainMenu);
     m_stackedWidget->addWidget(m_eduPage);
     m_stackedWidget->addWidget(m_setPage);
     m_stackedWidget->addWidget(m_conPage);
+    m_stackedWidget->addWidget(m_lesPage);
 
     mainLayout->addWidget(m_stackedWidget);
 
@@ -57,6 +61,10 @@ void MainWindow::setupConnections(){
         m_stackedWidget->setCurrentWidget(m_conPage);
     });
 
+    connect(m_mainMenu, &MainMenu::switchToLessonConstructor, [this](){
+        m_stackedWidget->setCurrentWidget(m_lesPage);
+    });
+
     // educational section
     connect(m_eduPage, &EducationalSection::switchToMainMenu, [this](){
         m_stackedWidget->setCurrentWidget(m_mainMenu);
@@ -75,6 +83,11 @@ void MainWindow::setupConnections(){
     connect(m_setPage, &Settings::switchLang, [this](int index) {
         LangManager::instance().setLanguage(index);
         this->applyLanguage(); 
+    });
+
+    // lesson constructor
+    connect(m_lesPage, &LessonConstructor::switchToMainMenu, [this](){
+        m_stackedWidget->setCurrentWidget(m_mainMenu);
     });
 
 }

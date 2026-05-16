@@ -24,26 +24,31 @@ void MainMenu::onSettingsButtonClicked(){
     emit switchToSettings();
 }
 
+void MainMenu::onLessonConstructorButtonClicked(){
+    emit switchToLessonConstructor();
+}
+
 void MainMenu::retranslateUI(){
     auto &lang = LangManager::instance();
 
     educationalSectionButton->setText(lang.get("educationalSectionButton"));
     constructorButton->setText(lang.get("constructorButton"));
     settingsButton->setText(lang.get("settingsButton"));
+    lessonConstructorButton->setText(lang.get("lessonConstructorButton"));
 }
 
 void MainMenu::setupUI(){
     auto *gridLayout = new QGridLayout(this);
 
-
     educationalSectionButton = new QPushButton(this);
     constructorButton = new QPushButton(this);
     settingsButton = new QPushButton(this);
+    lessonConstructorButton = new QPushButton(this);
     
     gridLayout->addWidget(educationalSectionButton, 0, 0);
     gridLayout->addWidget(constructorButton, 1, 0);
     gridLayout->addWidget(settingsButton, 2, 0);
-
+    gridLayout->addWidget(lessonConstructorButton, 3, 0);
 
 }
 
@@ -56,6 +61,8 @@ void MainMenu::setupConnections(){
 
     connect(settingsButton, &QPushButton::clicked,
             this, &MainMenu::onSettingsButtonClicked);
-
+    
+    connect(lessonConstructorButton, &QPushButton::clicked,
+            this, &MainMenu::onLessonConstructorButtonClicked);
 }
 
