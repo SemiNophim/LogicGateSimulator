@@ -20,12 +20,13 @@
 #include "Constructor.h"
 #include "LanguageManager/LangManager.h"
 
+bool placeble = false;
+
 Constructor::Constructor(QWidget *parent) : QWidget(parent){
     setupUI();
     retranslateUI();
     setupConnections();
     setupRules();
-    testRect();
 }
 
 void Constructor::onMainMenuButtonClicked(){
@@ -52,6 +53,9 @@ void Constructor::setupUI(){
     instrumentBar->setStyleSheet("background-color: #2b2b2b; color: white;");
 
     auto *andGate = new QPushButton("andGate", instrumentBar);
+    connect(andGate, &QPushButton::clicked, this, [](){
+        placeble = true;
+    });
     auto *orGate = new QPushButton("orGate", instrumentBar);
 
     instrumentBarLayout->addWidget(andGate);
@@ -80,12 +84,17 @@ void Constructor::setupRules(){
     c_view->viewport()->installEventFilter(this);
 }
 
-void Constructor::testRect(){
+void Constructor::testRect(const QPointF &pos){
     QColor customColor("#848C8E");
     QBrush brush(customColor);
-    QPen pen(Qt::black, 2);
+    QPen pen(Qt::black, c_scene->getBorderSize());
 
-    QGraphicsRectItem *gate = c_scene->addRect(100, 100, 80, 60, pen, brush);
+    int step = c_scene->getGridSize();
+
+    qreal snappedX = std::round(pos.x() / step) * step;
+    qreal snappedY = std::round(pos.y() / step) * step;
+
+    QGraphicsRectItem *gate = c_scene->addRect(snappedX, snappedY, 80, 60, pen, brush);
     gate->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 }
 
@@ -127,6 +136,13 @@ bool Constructor::eventFilter(QObject *obj, QEvent *event){
                 );
                 
                 QApplication::sendEvent(c_view->viewport(), &fakePress);
+                return true;
+            }
+            else if(mouseEvent->button() == Qt::LeftButton && placeble){
+                QPointF scenePos = c_view->mapToScene(mouseEvent->position().toPoint());
+                testRect(scenePos);
+                placeble = false;
+
                 return true;
             }
         }

@@ -29,7 +29,7 @@ private:
     void setupUI();
     void setupConnections();
     void setupRules();
-    void testRect();
+    void testRect(const QPointF &pos);
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 };
