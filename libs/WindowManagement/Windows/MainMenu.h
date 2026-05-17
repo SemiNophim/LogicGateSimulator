@@ -29,6 +29,7 @@ private:
     QPushButton *settingsButton;
     QPushButton *lessonConstructorButton;
 
+
     void setupUI();
     void setupConnections();
 };

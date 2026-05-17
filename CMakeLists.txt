@@ -26,6 +26,8 @@ add_subdirectory(
 add_executable(LogicGateSimulator 
     src/main.cpp
     src/LangInit.h
+
+    resources.qrc
 )
 
 target_link_libraries(LogicGateSimulator PRIVATE 

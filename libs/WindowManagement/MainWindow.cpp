@@ -15,6 +15,8 @@
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
     setupConnections();
+
+    showMaximized();
 };
 
 void MainWindow::applyLanguage(){
@@ -28,7 +30,11 @@ void MainWindow::applyLanguage(){
 void MainWindow::setupUI(){
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
     m_stackedWidget = new QStackedWidget(this);
+
+    m_stackedWidget->setContentsMargins(0, 0, 0, 0);
 
     m_mainMenu = new MainMenu(this);
     m_eduPage = new EducationalSection(this);
@@ -91,3 +97,4 @@ void MainWindow::setupConnections(){
     });
 
 }
+
