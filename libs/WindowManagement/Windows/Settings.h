@@ -3,6 +3,10 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QComboBox>
+#include <QStackedWidget>
+#include <QFrame>
+
+#include "Settings/InterfaceSettings.h"
 
 class Settings : public QWidget {
     Q_OBJECT
@@ -18,14 +22,21 @@ signals:
 
 private slots:
     void onMainMenuButtonClicked();
-    void onChangeLangButtonClicked();
+    void onChangeLangButtonClicked(int index);
 
 private:
     QPushButton *mainMenuButton;
-    QPushButton *changeLangButton;
+    QPushButton *interfaceButton;
+    QPushButton *constructorButton;
+    QPushButton *controlsButton;
     QComboBox *langBox;
+
+    InterfaceSettings *interfaceSettingsPage;
+    QStackedWidget *stackedWidget;
+    QFrame *mainSettingsPanel;
 
     void setupUI();
     void setupConnections();
+    void applyLanguage();
 };
 

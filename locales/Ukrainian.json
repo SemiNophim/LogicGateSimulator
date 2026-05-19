@@ -5,6 +5,9 @@
     "educationalSectionButton": "Навчальний розділ",
     "changeLangButton": "Змінити мову",
     "constructorButton": "Конструктор",
-    "lessonConstructorButton": "Створення уроків"
+    "lessonConstructorButton": "Створення уроків",
+    "backButton": "Назад",
+    "interfaceButton": "Інтерфейс",
+    "controlsButton": "Керування"
 }
 

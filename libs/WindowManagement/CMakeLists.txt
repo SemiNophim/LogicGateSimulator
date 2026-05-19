@@ -8,6 +8,7 @@ set(WINDOW_SOURCES
     Windows/Constructor.cpp
     Windows/LessonConstructor.cpp
     Windows/ConstructorScheme.cpp
+    Windows/Settings/InterfaceSettings.cpp
 
 )
 
@@ -19,6 +20,7 @@ set(WINDOW_HEADERS
     Windows/Constructor.h
     Windows/LessonConstructor.h
     Windows/ConstructorScheme.h
+    Windows/Settings/InterfaceSettings.h
 
     # Languages
     LanguageManager/LangManager.h 

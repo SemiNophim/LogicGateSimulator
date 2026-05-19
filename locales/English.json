@@ -5,6 +5,9 @@
     "educationalSectionButton": "Educational section",
     "changeLangButton": "Change language",
     "constructorButton": "Constructor",
-    "lessonConstructorButton": "Lesson maker"
+    "lessonConstructorButton": "Lesson maker",
+    "backButton": "Back",
+    "interfaceButton": "Interface",
+    "controlsButton": "Controls"
 }
 
