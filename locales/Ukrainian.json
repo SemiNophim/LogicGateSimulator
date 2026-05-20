@@ -1,13 +1,23 @@
 {
     "langName": "Українська",
+
     "mainMenuButton": "Головне Меню",
     "settingsButton": "Налаштування",
     "educationalSectionButton": "Навчальний розділ",
-    "changeLangButton": "Змінити мову",
     "constructorButton": "Конструктор",
     "lessonConstructorButton": "Створення уроків",
+
+    "changeLangButton": "Змінити мову",
     "backButton": "Назад",
     "interfaceButton": "Інтерфейс",
-    "controlsButton": "Керування"
+    "controlsButton": "Керування",
+
+    "newProjectButton": "Новий проект",
+    "openProjectButton": "Відкрити проект",
+    "saveProjectButton": "Зберегти проект",
+    "startSimButton": "Запустити симуляцію",
+    "stopSimButton": "Зупинити симуляцію",
+    "undoButton": "Повернути",
+    "constructorTitle": "Конструктор"
 }
 

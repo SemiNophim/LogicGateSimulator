@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QLabel>
 
 #include "ConstructorScheme.h"
 
@@ -21,10 +22,26 @@ private slots:
     void onMainMenuButtonClicked();
 
 private:
-    QPushButton *mainMenuButton;
+    QWidget *topBar;
+    QWidget *projectControlBar;
     QWidget *instrumentBar;
+    QWidget *infoSidebar;
+
+    QLabel *titleLabel;
+    QPushButton *mainMenuButton;
+    QPushButton *newProjectBtn;
+    QPushButton *openProjectBtn;
+    QPushButton *saveProjectBtn;
+    QPushButton *startSimBtn;
+    QPushButton *stopSimBtn;
+
     ConstructorScheme *c_scene;
     QGraphicsView *c_view;
+
+    QWidget *previewBlock;
+    QWidget *specsBlock;
+    QWidget *historyBlock;
+    QPushButton *undoBtn;
     
     void setupUI();
     void setupConnections();

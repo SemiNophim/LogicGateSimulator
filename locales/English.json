@@ -1,13 +1,23 @@
 {
     "langName": "English",
+
     "mainMenuButton": "Main menu",
     "settingsButton": "Settings",
     "educationalSectionButton": "Educational section",
-    "changeLangButton": "Change language",
     "constructorButton": "Constructor",
     "lessonConstructorButton": "Lesson maker",
+
+    "changeLangButton": "Change language",
     "backButton": "Back",
     "interfaceButton": "Interface",
-    "controlsButton": "Controls"
+    "controlsButton": "Controls",
+
+    "newProjectButton": "New project",
+    "openProjectButton": "Open project",
+    "saveProjectButton": "Save Project",
+    "startSimButton": "Start simulation",
+    "stopSimButton": "Stop simulation",
+    "undoButton": "Undo",
+    "constructorTitle": "Constructor"
 }
 
