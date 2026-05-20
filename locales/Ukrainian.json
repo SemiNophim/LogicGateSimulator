@@ -18,6 +18,9 @@
     "startSimButton": "Запустити симуляцію",
     "stopSimButton": "Зупинити симуляцію",
     "undoButton": "Повернути",
-    "constructorTitle": "Конструктор"
+    "constructorTitle": "Конструктор",
+
+    "startButton": "Почати",
+    "topicsTitle": "Теми"
 }
 

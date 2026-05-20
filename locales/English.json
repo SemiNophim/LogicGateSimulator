@@ -18,6 +18,9 @@
     "startSimButton": "Start simulation",
     "stopSimButton": "Stop simulation",
     "undoButton": "Undo",
-    "constructorTitle": "Constructor"
+    "constructorTitle": "Constructor",
+
+    "startButton": "Start",
+    "topicsTitle": "Topics"
 }
 

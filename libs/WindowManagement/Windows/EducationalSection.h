@@ -2,7 +2,10 @@
 
 #include <QWidget>
 #include <QPushButton>
-#include <qtmetamacros.h>
+#include <QStackedWidget>
+
+#include "Lesson.h"
+#include "TopicsPage.h"
 
 class EducationalSection : public QWidget {
     Q_OBJECT
@@ -15,11 +18,10 @@ public:
 signals:
     void switchToMainMenu();
 
-private slots:
-    void onMainMenuButtonClicked();
-
 private:
-    QPushButton *mainMenuButton;
+    QStackedWidget *stackedWidget;
+    TopicsPage *topicsPage;
+    Lesson *lessonPage;
 
     void setupUI();
     void setupConnections();

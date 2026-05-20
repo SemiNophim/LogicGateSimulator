@@ -1,39 +1,51 @@
-#include <QWidget>
-#include <QGridLayout>
-#include <QPushButton>
-
 #include "EducationalSection.h"
-#include "LanguageManager/LangManager.h"
+#include <QStackedWidget>
+#include <QGridLayout>
+
+
+#include "Lesson.h"     
+#include "TopicsPage.h"
 
 EducationalSection::EducationalSection(QWidget *parent) : QWidget(parent) {
     setupUI();
-    retranslateUI();
     setupConnections();
 }
 
-void EducationalSection::onMainMenuButtonClicked(){
-    emit switchToMainMenu();
+void EducationalSection::setupUI() {
+    auto *mainLayout = new QGridLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0); 
+
+    auto *backgroundWidget = new QWidget(this);
+    backgroundWidget->setStyleSheet("background-color: #4A5062;");
+    mainLayout->addWidget(backgroundWidget, 1, 1); 
+
+    stackedWidget = new QStackedWidget(this);
+    stackedWidget->setStyleSheet("background: transparent;");
+
+    topicsPage = new TopicsPage(stackedWidget);
+    lessonPage = new Lesson(stackedWidget);
+
+    stackedWidget->addWidget(topicsPage); 
+    stackedWidget->addWidget(lessonPage);  
+
+    mainLayout->addWidget(stackedWidget, 1, 1);
 }
 
-void EducationalSection::retranslateUI(){
-    auto &lang = LangManager::instance();
+void EducationalSection::setupConnections() {
+    connect(topicsPage, &TopicsPage::switchToMainMenu, this, &EducationalSection::switchToMainMenu);
 
-    mainMenuButton->setText(lang.get("mainMenuButton"));
+    connect(topicsPage, &TopicsPage::lessonSelected, [this](const QString &mdFilePath) {
+        lessonPage->loadLessonMarkdown(mdFilePath);
+        stackedWidget->setCurrentWidget(lessonPage); 
+    });
+
+    connect(lessonPage, &Lesson::goBackToTopics, [this]() {
+        stackedWidget->setCurrentWidget(topicsPage); 
+    });
 }
 
-void EducationalSection::setupUI(){
-    auto *gridLayout = new QGridLayout(this);
-
-    mainMenuButton = new QPushButton(this);
-
-
-    gridLayout->addWidget(mainMenuButton, 0, 0);
-
-}
-
-void EducationalSection::setupConnections(){
-    connect(mainMenuButton, &QPushButton::clicked,
-            this, &EducationalSection::onMainMenuButtonClicked);
-
+void EducationalSection::retranslateUI() {
+    topicsPage->retranslateUI();
+    lessonPage->retranslateUI();
 }
 

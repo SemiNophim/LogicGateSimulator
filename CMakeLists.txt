@@ -43,3 +43,13 @@ add_custom_command(TARGET LogicGateSimulator POST_BUILD
         "${OUTPUT_DIR}/locales"
     COMMENT "Copying translation files to the output directory..."
 )
+
+# Lessons
+add_custom_command(TARGET LogicGateSimulator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_DIR}/lessons"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources/lessons"
+        "${OUTPUT_DIR}/lessons"
+    COMMENT "Copying lessons files to the output directory..."
+)
+
