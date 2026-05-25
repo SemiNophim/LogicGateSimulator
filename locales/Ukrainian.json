@@ -21,6 +21,11 @@
     "constructorTitle": "Конструктор",
 
     "startButton": "Почати",
-    "topicsTitle": "Теми"
+    "topicsTitle": "Теми",
+
+    "constructorContentLabel": "Вміст",
+    "constructorPreviewLabel": "Попередній перегляд",
+    "generateButton": "Згенерувати",
+    "saveLessonButton": "Зберегти"
 }
 

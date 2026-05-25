@@ -21,6 +21,12 @@
     "constructorTitle": "Constructor",
 
     "startButton": "Start",
-    "topicsTitle": "Topics"
+    "topicsTitle": "Topics",
+
+    "constructorContentLabel": "Content",
+    "constructorPreviewLabel": "Preview",
+    "generateButton": "Generate",
+    "saveLessonButton": "Save"
+
 }
 
