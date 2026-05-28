@@ -371,3 +371,4 @@ void LessonConstructor::retranslateUI() {
     saveButton->setText(lang.get("saveLessonButton"));
     mainMenuButton->setText(lang.get("backButton"));
 }
+

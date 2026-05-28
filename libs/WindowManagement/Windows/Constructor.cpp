@@ -20,7 +20,11 @@
 #include "Constructor.h"
 #include "LanguageManager/LangManager.h"
 
+#include "DCPower.h"
+#include "LED.h"
+
 bool placeble = false;
+Element *bufferElement = nullptr;
 
 Constructor::Constructor(QWidget *parent) : QWidget(parent){
     setupUI();
@@ -188,27 +192,34 @@ void Constructor::setupUI(){
     instrumentGrid->setContentsMargins(0, 0, 0, 0);
     instrumentGrid->setSpacing(0);
 
-    auto *andGate = new QPushButton("AND", instrumentBar);
-    andGate->setStyleSheet(
+    auto *DCPowerButton = new QPushButton("DC power", instrumentBar);
+    DCPowerButton->setStyleSheet(
         "QPushButton {"
         "  background-color: #434C5E;"
         "  border: 2px solid #2E3440;"
         "  font-size: 12px;"
         "}"
     );
-    connect(andGate, &QPushButton::clicked, this, [](){ placeble = true; });
+    connect(DCPowerButton, &QPushButton::clicked, this, [this](){
+        placeble = true;
+        addDCPower();
+    });
     
-    auto *orGate = new QPushButton("OR", instrumentBar);
-    orGate->setStyleSheet(
+    auto *LEDButton = new QPushButton("LED", instrumentBar);
+    LEDButton->setStyleSheet(
         "QPushButton {"
         "  background-color: #434C5E;"
         "  border: 2px solid #2E3440;"
         "  font-size: 12px;"
         "}"
     );
+    connect(LEDButton, &QPushButton::clicked, this, [this](){
+        placeble = true;
+        addLED();
+    });
 
-    instrumentGrid->addWidget(andGate, 0, 0);
-    instrumentGrid->addWidget(orGate, 0, 1);
+    instrumentGrid->addWidget(DCPowerButton, 0, 0);
+    instrumentGrid->addWidget(LEDButton, 0, 1);
     instrumentGrid->setRowStretch(1, 1); 
 
     c_view->setStyleSheet(
@@ -309,18 +320,27 @@ void Constructor::setupRules(){
     c_view->viewport()->installEventFilter(this);
 }
 
-void Constructor::testRect(const QPointF &pos){
-    QColor customColor("#848C8E");
-    QBrush brush(customColor);
-    QPen pen(Qt::black, c_scene->getBorderSize());
+void Constructor::addItem(qreal x, qreal y){
+    float step = c_scene->getGridSize();
 
-    int step = c_scene->getGridSize();
+    qreal snappedX = std::round(x / step) * step;
+    qreal snappedY = std::round(y / step) * step;
 
-    qreal snappedX = std::round(pos.x() / step) * step;
-    qreal snappedY = std::round(pos.y() / step) * step;
+    bufferElement->setPos(snappedX, snappedY);
 
-    QGraphicsRectItem *gate = c_scene->addRect(snappedX, snappedY, 80, 60, pen, brush);
-    gate->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+    c_scene->addSchemeItem(bufferElement);
+
+    bufferElement = nullptr;
+}
+
+void Constructor::addDCPower(){
+    DCPower *power = new DCPower();
+    bufferElement = power;
+}
+
+void Constructor::addLED(){
+    LED *led = new LED();
+    bufferElement = led;
 }
 
 bool Constructor::eventFilter(QObject *obj, QEvent *event){
@@ -365,7 +385,7 @@ bool Constructor::eventFilter(QObject *obj, QEvent *event){
             }
             else if(mouseEvent->button() == Qt::LeftButton && placeble){
                 QPointF scenePos = c_view->mapToScene(mouseEvent->position().toPoint());
-                testRect(scenePos);
+                addItem(scenePos.x(), scenePos.y());
                 placeble = false;
 
                 return true;

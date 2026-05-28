@@ -19,9 +19,8 @@ set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/LogicGateSim")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 
 # Custom libs
-add_subdirectory(
-    libs/WindowManagement
-)
+add_subdirectory(libs/Elements)
+add_subdirectory(libs/WindowManagement)
 
 add_executable(LogicGateSimulator 
     src/main.cpp
@@ -57,7 +56,7 @@ add_custom_command(TARGET LogicGateSimulator POST_BUILD
 # Config
 add_custom_command(TARGET LogicGateSimulator POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_CURRENT_SOURCE_DIR}/resources/cofings"
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources/configs"
         "${OUTPUT_DIR}"
     COMMENT "Copying config files to the output directory..."
 )

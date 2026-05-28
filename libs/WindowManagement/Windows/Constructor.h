@@ -46,7 +46,11 @@ private:
     void setupUI();
     void setupConnections();
     void setupRules();
-    void testRect(const QPointF &pos);
+
+    void addItem(qreal x, qreal y);
+    void addDCPower();
+    void addLED();
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 };

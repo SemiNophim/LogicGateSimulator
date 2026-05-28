@@ -33,7 +33,13 @@ set(WINDOW_HEADERS
 
 add_library(WindowManagement ${WINDOW_SOURCES} ${WINDOW_HEADERS})
 
-target_link_libraries(WindowManagement PUBLIC Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network)
+target_link_libraries(WindowManagement PUBLIC 
+    Qt6::Widgets 
+    Qt6::Gui 
+    Qt6::Core 
+    Qt6::Network
+    Elements
+)
 
 set_target_properties(WindowManagement PROPERTIES AUTOMOC ON)
 

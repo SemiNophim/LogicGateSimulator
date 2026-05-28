@@ -1,0 +1,75 @@
+#include <QPen>
+#include <QBrush>
+#include <QPainter>
+#include <QGraphicsScene>
+
+#include "LED.h"
+
+LED::LED(QGraphicsItem *parent) : Element(parent) {
+    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+}
+
+void LED::setValue(float value) {
+    currentVoltage = value;
+    update(); 
+}
+
+QRectF LED::boundingRect() const {
+    qreal r = getGridSize(); 
+    qreal paddingLeft = r / 12; 
+    
+    return QRectF(-r - paddingLeft, -r, (r * 2) + paddingLeft, r * 2);
+}
+
+void LED::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    qreal r = getGridSize();
+    prepareGeometryChange(); 
+
+    painter->setPen(QPen(Qt::black, 2));
+
+    if (currentVoltage >= 4.8f) {
+        painter->setBrush(QBrush(Qt::yellow)); 
+    } else {
+        painter->setBrush(QBrush(Qt::darkGray));
+    }
+
+    qreal radius = r * 0.75;
+    painter->drawEllipse(QPointF(0, 0), radius, radius);
+    
+    qreal plusSize = radius * 0.3;
+    painter->drawLine(-plusSize, 0, plusSize, 0);
+    painter->drawLine(0, -plusSize, 0, plusSize);
+
+    painter->setPen(QPen(Qt::black, 2));
+    painter->drawLine(-radius, 0, -r, 0);    
+    
+    painter->setBrush(QBrush(Qt::black));
+    painter->drawEllipse(-r - 2, -2, 4, 4);
+}
+
+void LED::checkInputConnection() {
+    if (!scene()) return;
+
+    QPointF inputPinGlobalPos = mapToScene(-getGridSize(), 0);
+
+    QList<QGraphicsItem*> itemsAtPin = scene()->items(inputPinGlobalPos);
+
+    float newVoltage = 0.0f;
+
+    for (QGraphicsItem* item : itemsAtPin) {
+        if (item == this) continue;
+
+        Element* connectedElement = dynamic_cast<Element*>(item);
+        
+        if (connectedElement) {
+            newVoltage = connectedElement->getOutput();
+            break; 
+        }
+    }
+
+    setValue(newVoltage);
+}
+
