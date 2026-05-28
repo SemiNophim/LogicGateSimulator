@@ -1,7 +1,19 @@
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+#include <QNetworkRequest>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QCoreApplication>
+#include <QSettings>
+#include <QDir>
+
 #include "LessonConstructor.h"
 #include "LanguageManager/LangManager.h"
 
 LessonConstructor::LessonConstructor(QWidget *parent) : QWidget(parent) {
+    networkManager = new QNetworkAccessManager(this);
     setupUI();
     setupConnections();
 }
@@ -215,8 +227,138 @@ void LessonConstructor::setupUI() {
 }
 
 void LessonConstructor::setupConnections() {
+    connect(generateButton, &QPushButton::clicked,
+            this, &LessonConstructor::onGenerateButtonClicked);
+    connect(saveButton, &QPushButton::clicked,
+            this, &LessonConstructor::onSaveButtonClicked);
     connect(mainMenuButton, &QPushButton::clicked, 
             this, &LessonConstructor::switchToMainMenu);
+    
+    connect(networkManager, &QNetworkAccessManager::finished,
+            this, &LessonConstructor::onNetworkReplyReceived);
+}
+
+QString LessonConstructor::loadApiKey(){
+    QString configPath = QCoreApplication::applicationDirPath() + "/config.ini";
+    QSettings settings(configPath, QSettings::IniFormat);
+    
+    QString key = settings.value("API/GeminiKey", "").toString().trimmed();
+    return key;
+}
+
+void LessonConstructor::onGenerateButtonClicked() {
+    QString promptText = contentInput->toPlainText().trimmed();
+    if (promptText.isEmpty()) return;
+
+    QString apiKey = loadApiKey();
+    if (apiKey.isEmpty()) return;
+
+    previewViewer->setHtml(
+        "<p style='color: #D8DEE9;'>"
+        "Генерація уроку за допомогою Gemini LLM... Зачекайте..."
+        "</p>"
+    );
+    generateButton->setEnabled(false);
+
+    QString urlString = QString("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=%1").arg(apiKey);
+    QUrl url(urlString);
+
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject textObject;
+    textObject["text"] = QString(
+        "You are a strict text-formatting assistant. Your single task is to convert the user's raw text into beautifully structured Markdown format. "
+        "CRITICAL RULES:\n"
+        "1. DO NOT change, rewrite, or delete any words from the original text.\n"
+        "2. DO NOT add any new facts, explanations, or commentaries from yourself.\n"
+        "3. Only add Markdown syntax: structural headers (#, ##), bullet points (*), bold text (**text**), or horizontal lines (---) where appropriate to make it look like a professional lesson structure.\n"
+        "4. Return ONLY the formatted text. Do not wrap the output in system markdown code blocks (like ```markdown ... ```).\n"
+        "5. Keep the original language (Ukrainian).\n\n"
+        "Original text:\n%1"
+    ).arg(promptText);
+
+    QJsonObject partsObject;
+    partsObject["parts"] = QJsonArray{textObject};
+
+    QJsonObject jsonPayload;
+    jsonPayload["contents"] = QJsonArray{partsObject};
+
+    QJsonDocument doc(jsonPayload);
+    networkManager->post(request, doc.toJson());
+}
+
+void LessonConstructor::onNetworkReplyReceived(QNetworkReply *reply) {
+    generateButton->setEnabled(true);
+
+    if (reply->error() != QNetworkReply::NoError) {
+        QString errorType = reply->errorString();
+        QByteArray serverResponse = reply->readAll();
+        
+        previewViewer->setHtml(
+            QString("<p style='color: #BF616A; font-weight: bold;'>"
+                    "Помилка запиту до Gemini API.<br>"
+                    "Статус Qt: %1<br>"
+                    "Відповідь сервера: %2"
+                    "</p>").arg(errorType, QString(serverResponse))
+        );
+        reply->deleteLater();
+        return;
+    }
+
+    QByteArray responseData = reply->readAll();
+    reply->deleteLater();
+
+    QJsonDocument doc = QJsonDocument::fromJson(responseData);
+    if (!doc.isNull() && doc.isObject()) {
+        QJsonObject rootObj = doc.object();
+        if (rootObj.contains("candidates")) {
+            QJsonArray candidates = rootObj["candidates"].toArray();
+            if (!candidates.isEmpty()) {
+                QJsonObject firstCandidate = candidates.at(0).toObject();
+                if (firstCandidate.contains("content")) {
+                    QJsonObject contentObj = firstCandidate["content"].toObject();
+                    if (contentObj.contains("parts")) {
+                        QJsonArray parts = contentObj["parts"].toArray();
+                        if (!parts.isEmpty()) {
+                            QJsonObject firstPart = parts.at(0).toObject();
+                            QString generatedMarkdown = firstPart["text"].toString().trimmed();
+                            
+                            previewViewer->setMarkdown(generatedMarkdown);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void LessonConstructor::onSaveButtonClicked(){
+    QString contentToSave = previewViewer->toMarkdown().trimmed();
+    if(contentToSave.isEmpty()){
+        return;
+    }
+    
+    QString defaultPath = QCoreApplication::applicationDirPath() + "/lessons";
+    QDir().mkpath(defaultPath);
+
+    QString filePath = QFileDialog::getSaveFileName(
+        this,
+        "Зберегти згенерований урок",
+        defaultPath + "/new_lesson.md",
+        "Markdown Files (*.md)"
+    );
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    QFile file(filePath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << contentToSave;
+        file.close();
+    }
 }
 
 void LessonConstructor::retranslateUI() {

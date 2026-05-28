@@ -12,7 +12,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network)
 
 # Directories
 set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/LogicGateSim")
@@ -32,6 +32,7 @@ add_executable(LogicGateSimulator
 
 target_link_libraries(LogicGateSimulator PRIVATE 
     Qt6::Widgets
+    Qt6::Network
     WindowManagement
 )
 
@@ -51,5 +52,13 @@ add_custom_command(TARGET LogicGateSimulator POST_BUILD
         "${CMAKE_CURRENT_SOURCE_DIR}/resources/lessons"
         "${OUTPUT_DIR}/lessons"
     COMMENT "Copying lessons files to the output directory..."
+)
+
+# Config
+add_custom_command(TARGET LogicGateSimulator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources/cofings"
+        "${OUTPUT_DIR}"
+    COMMENT "Copying config files to the output directory..."
 )
 

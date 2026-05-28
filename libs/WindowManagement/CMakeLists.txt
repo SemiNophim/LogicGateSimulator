@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network)
 
 set(WINDOW_SOURCES
     MainWindow.cpp
@@ -33,7 +33,7 @@ set(WINDOW_HEADERS
 
 add_library(WindowManagement ${WINDOW_SOURCES} ${WINDOW_HEADERS})
 
-target_link_libraries(WindowManagement PUBLIC Qt6::Widgets Qt6::Gui Qt6::Core)
+target_link_libraries(WindowManagement PUBLIC Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network)
 
 set_target_properties(WindowManagement PROPERTIES AUTOMOC ON)
 
