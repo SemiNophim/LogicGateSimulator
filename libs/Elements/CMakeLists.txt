@@ -5,6 +5,7 @@ set(ELEMENT_SOURCES
     DCPower.cpp
     LED.cpp
     Wire.cpp
+    Ground.cpp
 
 )
 
@@ -14,6 +15,7 @@ set(ELEMENT_HEADERS
     LED.h
     Wire.h
     Pin.h
+    Ground.h
 
 )
 

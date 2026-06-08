@@ -62,6 +62,7 @@ private:
     void shadowItemLogic();
     void addDCPower();
     void addLED();
+    void addGround();
 
     bool handleWheelEvent(QWheelEvent *wheelEvent);
     bool handleMousePressEvent(QMouseEvent *mouseEvent);

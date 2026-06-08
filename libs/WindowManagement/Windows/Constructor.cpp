@@ -23,6 +23,7 @@
 #include "DCPower.h"
 #include "LED.h"
 #include "Wire.h"
+#include "Ground.h"
 
 Constructor::Constructor(QWidget *parent) : QWidget(parent){
     setupUI();
@@ -218,7 +219,7 @@ void Constructor::setupUI(){
         addLED();
     });
 
-    auto *WireButton = new QPushButton("Дріт", instrumentBar);
+    auto *WireButton = new QPushButton("Wire", instrumentBar);
     WireButton->setStyleSheet(
         "QPushButton {"
         "  background-color: #434C5E;"
@@ -232,10 +233,26 @@ void Constructor::setupUI(){
         m_selectedStartPin = nullptr;       
     });
 
+    auto *GroundButton = new QPushButton("Ground", instrumentBar);
+    GroundButton->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #434C5E;"
+        "  border: 2px solid #2E3440;"
+        "  font-size: 12px;"
+        "}"
+    );
+    connect(GroundButton, &QPushButton::clicked, this, [this](){
+        handleBufferElements();
+        m_currentMode = EditorMode::PlaceItem; 
+        addGround();
+    });
+
     instrumentGrid->addWidget(DCPowerButton, 0, 0);
     instrumentGrid->addWidget(LEDButton, 0, 1);
     instrumentGrid->addWidget(WireButton, 1, 0);
+    instrumentGrid->addWidget(GroundButton, 1, 1);
     instrumentGrid->setRowStretch(2, 1); 
+
 
     c_view->setStyleSheet(
         "QGraphicsView {"
@@ -376,6 +393,12 @@ void Constructor::addDCPower(){
 void Constructor::addLED(){
     LED *led = new LED();
     bufferElement = led;
+    shadowItemLogic();
+}
+
+void Constructor::addGround(){
+    Ground *ground = new Ground();
+    bufferElement = ground;
     shadowItemLogic();
 }
 
