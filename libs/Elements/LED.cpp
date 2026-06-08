@@ -31,10 +31,9 @@ void LED::setValue(float value) {
 }
 
 QRectF LED::boundingRect() const {
-    qreal r = getGridSize(); 
-    qreal paddingLeft = r / 12; 
-    
-    return QRectF(-r - paddingLeft, -r, (r * 2) + paddingLeft, r * 2);
+    qreal r = getGridSize();
+
+    return QRectF(-r - 5, -r - 5, 2 * r + 10, 2 * r + 10);
 }
 
 void LED::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -45,14 +44,13 @@ void LED::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidg
     prepareGeometryChange(); 
 
     painter->setPen(QPen(Qt::black, 2));
-
-    if (currentVoltage >= 4.8f) {
+    if (currentVoltage >= 4.8f) { 
         painter->setBrush(QBrush(Qt::yellow)); 
     } else {
         painter->setBrush(QBrush(Qt::darkGray));
     }
 
-    qreal radius = r * 0.75;
+    qreal radius = r * 0.75; 
     painter->drawEllipse(QPointF(0, 0), radius, radius);
     
     qreal plusSize = radius * 0.3;
@@ -60,10 +58,18 @@ void LED::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidg
     painter->drawLine(0, -plusSize, 0, plusSize);
 
     painter->setPen(QPen(Qt::black, 2));
-    painter->drawLine(-radius, 0, -r, 0);    
+    painter->drawLine(QPointF(-radius, 0), QPointF(-r, 0));
     
     painter->setBrush(QBrush(Qt::black));
-    painter->drawEllipse(-r - 2, -2, 4, 4);
+    painter->setPen(Qt::NoPen); 
+    painter->drawEllipse(QPointF(-r, 0), 3, 3); 
+
+    painter->setPen(QPen(Qt::black, 2));
+    painter->drawLine(QPointF(radius, 0), QPointF(r, 0)); 
+    
+    painter->setBrush(QBrush(Qt::black));
+    painter->setPen(Qt::NoPen);
+    painter->drawEllipse(QPointF(r, 0), 3, 3); 
 }
 
 void LED::checkInputConnection() {

@@ -227,6 +227,7 @@ void Constructor::setupUI(){
         "}"
     );
     connect(WireButton, &QPushButton::clicked, this, [this](){
+        handleBufferElements();
         m_currentMode = EditorMode::DrawWire; 
         m_selectedStartPin = nullptr;       
     });
@@ -448,48 +449,51 @@ bool Constructor::handleMousePressEvent(QMouseEvent *mouseEvent) {
         }
         
         if (m_currentMode == EditorMode::DrawWire) {
-            QGraphicsItem *clickedItem = c_scene->itemAt(scenePos, c_view->transform());
-            Element *clickedElement = dynamic_cast<Element*>(clickedItem);
-        
-            if (clickedElement) {
-                Pin* closestPin = nullptr;
-                qreal minDistance = c_scene->getGridSize(); 
+            float gridSize = c_scene->getGridSize();
+            Pin* closestPin = nullptr;
+            qreal minDistance = c_scene->getGridSize() * 1.5f; 
 
-                for (Pin& pin : clickedElement->getPins()) {
-                    qreal dist = QLineF(scenePos, pin.globalPos()).length();
-                    if (dist < minDistance) {
-                        minDistance = dist;
-                        closestPin = &pin;
-                    }
-                }
+            QRectF clickArea(scenePos.x() - gridSize, scenePos.y() - gridSize, gridSize * 2, gridSize * 2);
+            QList<QGraphicsItem*> itemsNearClick = c_scene->items(clickArea);
 
-                if (closestPin) {
-                    if (!m_selectedStartPin) {
-                        m_selectedStartPin = closestPin;
-
-                        m_previewWire = new Wire(m_selectedStartPin, nullptr);
-                        m_previewWire->setOpacity(0.5); 
-                        c_scene->addItem(m_previewWire);
-                    } else {
-                        if (m_selectedStartPin != closestPin) { 
-                            if (m_previewWire) {
-                                c_scene->removeItem(m_previewWire);
-                                delete m_previewWire;
-                                m_previewWire = nullptr;
-                            }
-
-                            Wire *newWire = new Wire(m_selectedStartPin, closestPin);
-                            c_scene->addItem(newWire);
-                            
-                            m_selectedStartPin->connectedWires.push_back(newWire);
-                            closestPin->connectedWires.push_back(newWire);
-                        
-                            m_selectedStartPin = nullptr;
-                            m_currentMode = EditorMode::Select;
+            for (QGraphicsItem* item : itemsNearClick) {
+                if (Element* clickedElement = dynamic_cast<Element*>(item)) {
+                    for (Pin& pin : clickedElement->getPins()) {
+                        qreal dist = QLineF(scenePos, pin.globalPos()).length();
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closestPin = &pin;
                         }
                     }
-                    return true;
                 }
+            }
+
+            if (closestPin) {
+                if (!m_selectedStartPin) {
+                    m_selectedStartPin = closestPin;
+                    
+                    m_previewWire = new Wire(m_selectedStartPin, nullptr);
+                    m_previewWire->setOpacity(0.5);
+                    c_scene->addItem(m_previewWire);
+                } else {
+                    if (m_selectedStartPin != closestPin) { 
+                        if (m_previewWire) {
+                            c_scene->removeItem(m_previewWire);
+                            delete m_previewWire;
+                            m_previewWire = nullptr;
+                        }
+
+                        Wire *newWire = new Wire(m_selectedStartPin, closestPin);
+                        c_scene->addItem(newWire);
+                        
+                        m_selectedStartPin->connectedWires.push_back(newWire);
+                        closestPin->connectedWires.push_back(newWire);
+                    
+                        m_selectedStartPin = nullptr;
+                        m_currentMode = EditorMode::Select;
+                    }
+                }
+                return true;
             }
         }
     }
@@ -514,17 +518,21 @@ bool Constructor::handleMouseMoveEvent(QMouseEvent *mouseEvent) {
             m_selectedStartPin &&
             m_previewWire
     ){
-        QGraphicsItem *itemUnderMouse = c_scene->itemAt(scenePos, c_view->transform());
-        Element *elementUnderMouse = dynamic_cast<Element*>(itemUnderMouse);
+        float gridSize = c_scene->getGridSize(); 
         Pin* targetPin = nullptr;
+        qreal minDistance = gridSize * 1.5f; 
 
-        if (elementUnderMouse) {
-            qreal minDistance = c_scene->getGridSize();
-            for (Pin& pin : elementUnderMouse->getPins()) {
-                qreal dist = QLineF(scenePos, pin.globalPos()).length();
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    targetPin = &pin;
+        QRectF detectionArea(scenePos.x() - gridSize, scenePos.y() - gridSize, gridSize * 2, gridSize * 2);
+        QList<QGraphicsItem*> itemsNearMouse = c_scene->items(detectionArea);
+
+        for (QGraphicsItem* item : itemsNearMouse) {
+            if (Element* elementUnderMouse = dynamic_cast<Element*>(item)) {
+                for (Pin& pin : elementUnderMouse->getPins()) {
+                    qreal dist = QLineF(scenePos, pin.globalPos()).length();
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        targetPin = &pin;
+                    }
                 }
             }
         }
