@@ -20,6 +20,8 @@ signals:
     
 private slots:
     void onMainMenuButtonClicked();
+    void runSimulation();
+    void stopSimulation();
 
 private:
     QWidget *topBar;

@@ -17,6 +17,9 @@
 #include <QColor>
 #include <Qt>
 
+#include <queue>
+#include <set>
+
 #include "Constructor.h"
 #include "LanguageManager/LangManager.h"
 
@@ -341,7 +344,10 @@ void Constructor::setupUI(){
 void Constructor::setupConnections(){
     connect(mainMenuButton, &QPushButton::clicked,
             this, &Constructor::onMainMenuButtonClicked);
-
+    connect(startSimBtn, &QPushButton::clicked,
+            this, &Constructor::runSimulation);
+    connect(stopSimBtn, &QPushButton::clicked,
+            this, &Constructor::stopSimulation);
 }
 
 void Constructor::setupRules(){
@@ -617,5 +623,104 @@ bool Constructor::handleMouseReleaseEvent(QMouseEvent *mouseEvent) {
         return false;
     }
     return false;
+}
+
+void Constructor::runSimulation() {
+    for (QGraphicsItem* item : c_scene->items()) {
+        if (Wire* wire = dynamic_cast<Wire*>(item)) {
+            wire->setVoltage(-1.0f); 
+        }
+        if (Element* el = dynamic_cast<Element*>(item)) {
+            if (LED* led = dynamic_cast<LED*>(el)) {
+                led->setValue(0.0f);
+                led->update();
+            }
+        }
+    }
+
+    std::vector<DCPower*> powerSources;
+    for (QGraphicsItem* item : c_scene->items()) {
+        if (DCPower* power = dynamic_cast<DCPower*>(item)) {
+            powerSources.push_back(power);
+        }
+    }
+
+    std::queue<std::pair<Pin*, float>> pinQueue;
+    std::set<Pin*> visitedPins;
+
+    for (DCPower* power : powerSources) {
+        float initialVoltage = power->getOutput(); 
+        
+        for (Pin& pin : power->getPins()) {
+            if (pin.type == PinType::Output) {
+                pinQueue.push({&pin, initialVoltage});
+                visitedPins.insert(&pin);
+            }
+        }
+    }
+
+    std::map<Wire*, float> activeWires;
+    std::set<Ground*> reachedGrounds;
+
+    while (!pinQueue.empty()) {
+        auto [currentPin, currentVoltage] = pinQueue.front();
+        pinQueue.pop();
+
+        if (Ground* gnd = dynamic_cast<Ground*>(currentPin->parentElement)) {
+            reachedGrounds.insert(gnd);
+            continue;
+        }
+
+        for (Wire* wire : currentPin->connectedWires) {
+            if (!wire) continue;
+
+            activeWires[wire] = currentVoltage;
+
+            Pin* nextPin = wire->getOppositePin(currentPin);
+            if (nextPin && visitedPins.find(nextPin) == visitedPins.end()) {
+                visitedPins.insert(nextPin);
+
+                if (nextPin->type == PinType::Input) {
+                    Element* parentElement = nextPin->parentElement;
+                    if (parentElement) {
+                        
+                        if (LED* led = dynamic_cast<LED*>(parentElement)) {
+                            led->setValue(currentVoltage);
+                        }
+
+                        float outputVoltage = parentElement->getOutput();
+
+                        for (Pin& parentPin : parentElement->getPins()) {
+                            if (parentPin.type == PinType::Output && visitedPins.find(&parentPin) == visitedPins.end()) {
+                                pinQueue.push({&parentPin, outputVoltage});
+                                visitedPins.insert(&parentPin);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (!reachedGrounds.empty()) {
+        for (auto const& [wire, voltage] : activeWires) {
+            wire->setVoltage(voltage);
+        }
+    }
+}
+
+void Constructor::stopSimulation() {
+    for (QGraphicsItem* item : c_scene->items()) {
+        if (Wire* wire = dynamic_cast<Wire*>(item)) {
+            wire->setVoltage(-1.0f); 
+        }
+    }
+
+    for (QGraphicsItem* item : c_scene->items()) {
+        if (LED* led = dynamic_cast<LED*>(item)) {
+            led->setValue(0.0f); 
+            led->update();              
+        }
+    }
 }
 
