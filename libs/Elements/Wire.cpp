@@ -12,18 +12,22 @@ Wire::Wire(Pin* startPin, Pin* endPin, QGraphicsItem* parent)
     updatePath();
 }
 
-void Wire::updatePath() {
-    if (!m_startPin || !m_endPin) return;
+void Wire::updatePath(QPointF manualEndPoint) {
+    if (!m_startPin) return;
     
     QPointF p1 = m_startPin->globalPos();
-    QPointF p2 = m_endPin->globalPos();
+    QPointF p2;
+
+    if (m_endPin) {
+        p2 = m_endPin->globalPos();
+    } else {
+        p2 = manualEndPoint;
+    }
 
     QPainterPath path;
     path.moveTo(p1);
 
-    int step = Element::getGridSize();
     qreal midX = p1.x() + (p2.x() - p1.x()) / 2.0;
-
     path.lineTo(midX, p1.y()); 
     path.lineTo(midX, p2.y()); 
     path.lineTo(p2);           

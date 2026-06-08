@@ -54,8 +54,9 @@ private:
     };
 
     EditorMode m_currentMode = EditorMode::Select;
-    Pin* m_selectedStartPin = nullptr;
-    Element* bufferElement = nullptr;
+    Pin *m_selectedStartPin = nullptr;
+    Wire *m_previewWire = nullptr;
+    Element *bufferElement = nullptr;
 
     void addItem(qreal x, qreal y);
     void shadowItemLogic();
@@ -66,6 +67,8 @@ private:
     bool handleMousePressEvent(QMouseEvent *mouseEvent);
     bool handleMouseMoveEvent(QMouseEvent *mouseEvent);
     bool handleMouseReleaseEvent(QMouseEvent *mouseEvent);
+
+    void handleBufferElements();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

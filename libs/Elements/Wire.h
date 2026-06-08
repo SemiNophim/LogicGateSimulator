@@ -7,7 +7,7 @@ class Wire : public QGraphicsPathItem {
 public:
     Wire(Pin* startPin, Pin* endPin, QGraphicsItem* parent = nullptr);
 
-    void updatePath();
+    void updatePath(QPointF manualEndPoint = QPointF());
 
     void setVoltage(float voltage);
     float getVoltage() const { return m_voltage; }
