@@ -6,6 +6,16 @@
 
 DCPower::DCPower(QGraphicsItem *parent) : Element(parent) {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+
+    qreal r = getGridSize();
+
+    Pin outPin;
+    outPin.id = Pin::generateUniqueId(); 
+    outPin.parentElement = this;
+    outPin.localPos = QPointF(r, 0); 
+    outPin.type = PinType::Output;
+    
+    m_pins.push_back(outPin);
 }
 
 float DCPower::getOutput() {

@@ -1,7 +1,7 @@
 #include <QGraphicsScene>
 
 #include "Element.h"
-#include "LED.h"
+#include "Pin.h"
 
 int Element::m_gridSize = 20;
 
@@ -15,25 +15,16 @@ int Element::getGridSize(){
     return m_gridSize;
 }
 
-
+QPointF Pin::globalPos() const {
+    if (!parentElement) return QPointF();
+    return parentElement->mapToScene(localPos);
+}
 
 void Element::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     QGraphicsObject::mouseReleaseEvent(event);
-
-    QPointF currentPos = this->pos();
-    int step = getGridSize();
-    qreal snappedX = std::round(currentPos.x() / step) * step;
-    qreal snappedY = std::round(currentPos.y() / step) * step;
-    this->setPos(snappedX, snappedY);
-
-    if (scene()) {
-        for (QGraphicsItem* item : scene()->items()) {
-            LED* led = dynamic_cast<LED*>(item);
-            if (led) {
-                led->checkInputConnection();
-            }
-        }
-    }
 }
 
+std::vector<Pin>& Element::getPins() {
+    return m_pins; 
+}
 

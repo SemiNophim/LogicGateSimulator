@@ -47,9 +47,25 @@ private:
     void setupConnections();
     void setupRules();
 
+    enum class EditorMode {
+        Select,  
+        PlaceItem, 
+        DrawWire  
+    };
+
+    EditorMode m_currentMode = EditorMode::Select;
+    Pin* m_selectedStartPin = nullptr;
+    Element* bufferElement = nullptr;
+
     void addItem(qreal x, qreal y);
+    void shadowItemLogic();
     void addDCPower();
     void addLED();
+
+    bool handleWheelEvent(QWheelEvent *wheelEvent);
+    bool handleMousePressEvent(QMouseEvent *mouseEvent);
+    bool handleMouseMoveEvent(QMouseEvent *mouseEvent);
+    bool handleMouseReleaseEvent(QMouseEvent *mouseEvent);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

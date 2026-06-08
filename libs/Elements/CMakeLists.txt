@@ -4,12 +4,17 @@ set(ELEMENT_SOURCES
     Element.cpp
     DCPower.cpp
     LED.cpp
+    Wire.cpp
+
 )
 
 set(ELEMENT_HEADERS
     Element.h 
     DCPower.h
     LED.h
+    Wire.h
+    Pin.h
+
 )
 
 add_library(Elements ${ELEMENT_SOURCES} ${ELEMENT_HEADERS})

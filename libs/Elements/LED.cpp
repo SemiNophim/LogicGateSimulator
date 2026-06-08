@@ -7,6 +7,22 @@
 
 LED::LED(QGraphicsItem *parent) : Element(parent) {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+
+    qreal r = getGridSize();
+    
+    Pin inPin;
+    inPin.id = Pin::generateUniqueId(); 
+    inPin.parentElement = this;
+    inPin.localPos = QPointF(-r, 0);
+    inPin.type = PinType::Input;
+    m_pins.push_back(inPin);
+
+    Pin outPin;
+    outPin.id = Pin::generateUniqueId(); 
+    outPin.parentElement = this;
+    outPin.localPos = QPointF(r, 0);
+    outPin.type = PinType::Output; 
+    m_pins.push_back(outPin);
 }
 
 void LED::setValue(float value) {

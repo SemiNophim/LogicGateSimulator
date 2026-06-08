@@ -22,9 +22,7 @@
 
 #include "DCPower.h"
 #include "LED.h"
-
-bool placeble = false;
-Element *bufferElement = nullptr;
+#include "Wire.h"
 
 Constructor::Constructor(QWidget *parent) : QWidget(parent){
     setupUI();
@@ -201,7 +199,12 @@ void Constructor::setupUI(){
         "}"
     );
     connect(DCPowerButton, &QPushButton::clicked, this, [this](){
-        placeble = true;
+        if (bufferElement) { 
+            c_scene->removeItem(bufferElement); 
+            delete bufferElement; 
+        }
+
+        m_currentMode = EditorMode::PlaceItem;
         addDCPower();
     });
     
@@ -214,13 +217,31 @@ void Constructor::setupUI(){
         "}"
     );
     connect(LEDButton, &QPushButton::clicked, this, [this](){
-        placeble = true;
+        if (bufferElement) { 
+            c_scene->removeItem(bufferElement); 
+            delete bufferElement; 
+        }
+        m_currentMode = EditorMode::PlaceItem;
         addLED();
+    });
+
+    auto *WireButton = new QPushButton("Дріт", instrumentBar);
+    WireButton->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #434C5E;"
+        "  border: 2px solid #2E3440;"
+        "  font-size: 12px;"
+        "}"
+    );
+    connect(WireButton, &QPushButton::clicked, this, [this](){
+        m_currentMode = EditorMode::DrawWire; 
+        m_selectedStartPin = nullptr;       
     });
 
     instrumentGrid->addWidget(DCPowerButton, 0, 0);
     instrumentGrid->addWidget(LEDButton, 0, 1);
-    instrumentGrid->setRowStretch(1, 1); 
+    instrumentGrid->addWidget(WireButton, 1, 0);
+    instrumentGrid->setRowStretch(2, 1); 
 
     c_view->setStyleSheet(
         "QGraphicsView {"
@@ -333,85 +354,191 @@ void Constructor::addItem(qreal x, qreal y){
     bufferElement = nullptr;
 }
 
+void Constructor::shadowItemLogic(){
+    bufferElement->setOpacity(0.5);
+    bufferElement->setFlag(QGraphicsItem::ItemIsMovable, false);
+    c_scene->addSchemeItem(bufferElement);
+}
+
 void Constructor::addDCPower(){
     DCPower *power = new DCPower();
     bufferElement = power;
+    shadowItemLogic();
 }
 
 void Constructor::addLED(){
     LED *led = new LED();
     bufferElement = led;
+    shadowItemLogic();
 }
 
-bool Constructor::eventFilter(QObject *obj, QEvent *event){
-    if (obj == c_view->viewport()){
-        if(event->type() == QEvent::Wheel){
-            auto *wheelEvent = static_cast<QWheelEvent*>(event);
-        
-            if(wheelEvent->modifiers() & Qt::ControlModifier){
-                qreal currentScale = c_view->transform().m11();
+bool Constructor::eventFilter(QObject *obj, QEvent *event) {
+    if (obj != c_view->viewport()) {
+        return QWidget::eventFilter(obj, event);
+    }
 
-                qreal factor = 1.1;
-                if(wheelEvent->angleDelta().y() < 0){
-                    factor = 1.0 / factor;
-                }
-            
-                qreal nextScale = currentScale * factor;
-            
-                if(nextScale >= 0.3 && nextScale <= 3.0){
-                    c_view->scale(factor, factor);
-                }
+    if (event->type() == QEvent::Wheel) {
+        return handleWheelEvent(static_cast<QWheelEvent*>(event));
+    }
+    
+    if (event->type() == QEvent::MouseButtonPress) {
+        return handleMousePressEvent(static_cast<QMouseEvent*>(event));
+    }
 
-                return true;
-            }
-        } 
-        else if(event->type() == QEvent::MouseButtonPress){
-            auto *mouseEvent = static_cast<QMouseEvent*>(event);
-            
-            if (mouseEvent->button() == Qt::MiddleButton) {
-                c_view->setDragMode(QGraphicsView::ScrollHandDrag);
-                
-                QMouseEvent fakePress(
-                    QEvent::MouseButtonPress, 
-                    mouseEvent->position(), 
-                    mouseEvent->globalPosition(),
-                    Qt::LeftButton, 
-                    Qt::LeftButton, 
-                    mouseEvent->modifiers()
-                );
-                
-                QApplication::sendEvent(c_view->viewport(), &fakePress);
-                return true;
-            }
-            else if(mouseEvent->button() == Qt::LeftButton && placeble){
-                QPointF scenePos = c_view->mapToScene(mouseEvent->position().toPoint());
-                addItem(scenePos.x(), scenePos.y());
-                placeble = false;
+    if (event->type() == QEvent::MouseMove) {
+        return handleMouseMoveEvent(static_cast<QMouseEvent*>(event));
+    }
+    
+    if (event->type() == QEvent::MouseButtonRelease) {
+        return handleMouseReleaseEvent(static_cast<QMouseEvent*>(event));
+    }
 
-                return true;
-            }
+    return QWidget::eventFilter(obj, event);
+}
+
+bool Constructor::handleWheelEvent(QWheelEvent *wheelEvent) {
+    if (wheelEvent->modifiers() & Qt::ControlModifier) {
+        qreal currentScale = c_view->transform().m11();
+        qreal factor = (wheelEvent->angleDelta().y() < 0) ? (1.0 / 1.1) : 1.1;
+        qreal nextScale = currentScale * factor;
+    
+        if (nextScale >= 0.3 && nextScale <= 3.0) {
+            c_view->scale(factor, factor);
         }
-        else if (event->type() == QEvent::MouseButtonRelease) {
-            auto *mouseEvent = static_cast<QMouseEvent*>(event);
-            
-            if (mouseEvent->button() == Qt::MiddleButton) {
-                QMouseEvent fakeRelease(
-                    QEvent::MouseButtonRelease, 
-                    mouseEvent->position(), 
-                    mouseEvent->globalPosition(),
-                    Qt::LeftButton, 
-                    Qt::LeftButton, 
-                    mouseEvent->modifiers()
-                );
-                
-                QApplication::sendEvent(c_view->viewport(), &fakeRelease);
+        return true;
+    }
+    return false;
+}
 
-                c_view->setDragMode(QGraphicsView::RubberBandDrag);
-                return true;
+bool Constructor::handleMousePressEvent(QMouseEvent *mouseEvent) {
+    if (mouseEvent->button() == Qt::MiddleButton) {
+        c_view->setDragMode(QGraphicsView::ScrollHandDrag);
+        QMouseEvent fakePress(QEvent::MouseButtonPress, 
+                mouseEvent->position(), 
+                mouseEvent->globalPosition(), 
+                Qt::LeftButton, 
+                Qt::LeftButton, 
+                mouseEvent->modifiers()
+        );
+        QApplication::sendEvent(c_view->viewport(), &fakePress);
+        return true;
+    }
+    
+    if (mouseEvent->button() == Qt::LeftButton) {
+        QPointF scenePos = c_view->mapToScene(mouseEvent->position().toPoint());
+
+        if (m_currentMode == EditorMode::PlaceItem) {
+            if (bufferElement) {
+                bufferElement->setOpacity(1.0);
+                
+                bufferElement->setFlag(QGraphicsItem::ItemIsMovable, true);
+                bufferElement->setFlag(QGraphicsItem::ItemIsSelectable, true);
+                
+                bufferElement = nullptr;
+            }
+
+            m_currentMode = EditorMode::Select;
+            return true;
+        }
+        
+        if (m_currentMode == EditorMode::DrawWire) {
+            QGraphicsItem *clickedItem = c_scene->itemAt(scenePos, c_view->transform());
+            Element *clickedElement = dynamic_cast<Element*>(clickedItem);
+        
+            if (clickedElement) {
+                Pin* closestPin = nullptr;
+                qreal minDistance = c_scene->getGridSize(); 
+
+                for (Pin& pin : clickedElement->getPins()) {
+                    qreal dist = QLineF(scenePos, pin.globalPos()).length();
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        closestPin = &pin;
+                    }
+                }
+
+                if (closestPin) {
+                    if (!m_selectedStartPin) {
+                        m_selectedStartPin = closestPin;
+                    } else {
+                        if (m_selectedStartPin != closestPin) { 
+                            Wire *newWire = new Wire(m_selectedStartPin, closestPin);
+                            c_scene->addItem(newWire);
+                            
+                            m_selectedStartPin->connectedWires.push_back(newWire);
+                            closestPin->connectedWires.push_back(newWire);
+                        
+                            m_selectedStartPin = nullptr;
+                            m_currentMode = EditorMode::Select;
+                        }
+                    }
+                    return true;
+                }
             }
         }
     }
+    return false;
+}
+
+bool Constructor::handleMouseMoveEvent(QMouseEvent *mouseEvent) {
+    if (m_currentMode == EditorMode::PlaceItem && bufferElement) {
+        QPointF scenePos = c_view->mapToScene(mouseEvent->position().toPoint());
+        int step = c_scene->getGridSize();
+        
+        qreal snappedX = std::round(scenePos.x() / step) * step;
+        qreal snappedY = std::round(scenePos.y() / step) * step;
+        
+        bufferElement->setPos(snappedX, snappedY);
+        return true;
+    }
+    return false;
+}
+
+bool Constructor::handleMouseReleaseEvent(QMouseEvent *mouseEvent) {
+    if (mouseEvent->button() == Qt::MiddleButton) {
+        QMouseEvent fakeRelease(QEvent::MouseButtonRelease, mouseEvent->position(), 
+                               mouseEvent->globalPosition(), Qt::LeftButton, Qt::LeftButton, mouseEvent->modifiers());
+        QApplication::sendEvent(c_view->viewport(), &fakeRelease);
+        c_view->setDragMode(QGraphicsView::RubberBandDrag);
+        return true;
+    }
     
-    return QWidget::eventFilter(obj, event);
+    if (mouseEvent->button() == Qt::LeftButton) {
+        int step = c_scene->getGridSize();
+        std::vector<Element*> elementsToSnap;
+        
+        for (QGraphicsItem* item : c_scene->selectedItems()) {
+            if (Element* el = dynamic_cast<Element*>(item)) {
+                elementsToSnap.push_back(el);
+            }
+        }
+        
+        if (elementsToSnap.empty()) {
+            QPointF scenePos = c_view->mapToScene(mouseEvent->position().toPoint());
+            QGraphicsItem *itemUnderMouse = c_scene->itemAt(scenePos, c_view->transform());
+            if (Element* el = dynamic_cast<Element*>(itemUnderMouse)) {
+                elementsToSnap.push_back(el);
+            }
+        }
+
+        for (Element* element : elementsToSnap) {
+            QPointF currentPos = element->pos();
+            qreal snappedX = std::round(currentPos.x() / step) * step;
+            qreal snappedY = std::round(currentPos.y() / step) * step;
+            element->setPos(snappedX, snappedY);
+        }
+
+        for (Element* element : elementsToSnap) {
+            for (Pin& pin : element->getPins()) {
+                for (Wire* wire : pin.connectedWires) {
+                    if (wire) {
+                        wire->updatePath();
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    return false;
 }
 
