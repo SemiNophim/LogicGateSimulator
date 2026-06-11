@@ -8,7 +8,8 @@ class Wire;
 enum class PinType {
     BiDirectional,
     Input,
-    Output
+    Output,
+    Ground
 };
 
 struct Pin {

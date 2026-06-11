@@ -1,7 +1,7 @@
 #include "Ground.h"
 #include <QPainter>
 
-Ground::Ground(QGraphicsItem *parent) : Element(parent) {
+Ground::Ground(QGraphicsItem *parent) : LoadElement(parent) {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 
     qreal r = getGridSize();
@@ -10,13 +10,23 @@ Ground::Ground(QGraphicsItem *parent) : Element(parent) {
     inPin.id = Pin::generateUniqueId(); 
     inPin.parentElement = this;
     inPin.localPos = QPointF(0, -r); 
-    inPin.type = PinType::Input;
+    inPin.type = PinType::Ground;
     m_pins.push_back(inPin);
 }
 
 QRectF Ground::boundingRect() const {
     qreal r = getGridSize();
     return QRectF(-r - 5, -r - 5, 2 * r + 10, 2 * r + 10);
+}
+
+void Ground::setInputValue(int pinId, float voltage) {
+    Q_UNUSED(pinId);
+    Q_UNUSED(voltage);
+}
+
+float Ground::getOutputValue(int pinId) const {
+    Q_UNUSED(pinId);
+    return 0.0f; 
 }
 
 void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

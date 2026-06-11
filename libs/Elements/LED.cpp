@@ -2,10 +2,11 @@
 #include <QBrush>
 #include <QPainter>
 #include <QGraphicsScene>
+#include <qtpreprocessorsupport.h>
 
 #include "LED.h"
 
-LED::LED(QGraphicsItem *parent) : Element(parent) {
+LED::LED(QGraphicsItem *parent) : LoadElement(parent) {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 
     qreal r = getGridSize();
@@ -25,9 +26,20 @@ LED::LED(QGraphicsItem *parent) : Element(parent) {
     m_pins.push_back(outPin);
 }
 
-void LED::setValue(float value) {
-    currentVoltage = value;
+void LED::setInputValue(int pinId, float voltage) {
+    Q_UNUSED(pinId);
+
+    currentVoltage = voltage;
     update(); 
+}
+
+float LED::getOutputValue(int pinId) const {
+    Q_UNUSED(pinId);
+
+    if(currentVoltage >= thresholdVoltage){
+        return currentVoltage;
+    }
+    return 0.0f;
 }
 
 QRectF LED::boundingRect() const {
@@ -70,28 +82,5 @@ void LED::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidg
     painter->setBrush(QBrush(Qt::black));
     painter->setPen(Qt::NoPen);
     painter->drawEllipse(QPointF(r, 0), 3, 3); 
-}
-
-void LED::checkInputConnection() {
-    if (!scene()) return;
-
-    QPointF inputPinGlobalPos = mapToScene(-getGridSize(), 0);
-
-    QList<QGraphicsItem*> itemsAtPin = scene()->items(inputPinGlobalPos);
-
-    float newVoltage = 0.0f;
-
-    for (QGraphicsItem* item : itemsAtPin) {
-        if (item == this) continue;
-
-        Element* connectedElement = dynamic_cast<Element*>(item);
-        
-        if (connectedElement) {
-            newVoltage = connectedElement->getOutput();
-            break; 
-        }
-    }
-
-    setValue(newVoltage);
 }
 

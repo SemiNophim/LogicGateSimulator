@@ -10,8 +10,6 @@ public:
     Element (QGraphicsItem *parent = nullptr) : QGraphicsObject(parent) {}
     virtual ~Element() = default;
 
-    virtual float getOutput() = 0; 
-
     static void setGridSize(int gridSize);
     static int getGridSize();
 

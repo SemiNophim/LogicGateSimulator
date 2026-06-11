@@ -1,12 +1,12 @@
 #pragma once
-#include "Element.h"
+#include "PowerElement.h"
 
-class DCPower : public Element {
+class DCPower : public PowerElement {
     Q_OBJECT 
 public:
     explicit DCPower(QGraphicsItem *parent = nullptr);
 
-    float getOutput() override;
+    float getOutputVoltage() const override;
     void setValue(float value);
 
     QRectF boundingRect() const override;

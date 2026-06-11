@@ -4,7 +4,7 @@
 
 #include "DCPower.h"
 
-DCPower::DCPower(QGraphicsItem *parent) : Element(parent) {
+DCPower::DCPower(QGraphicsItem *parent) : PowerElement(parent) {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 
     qreal r = getGridSize();
@@ -18,7 +18,7 @@ DCPower::DCPower(QGraphicsItem *parent) : Element(parent) {
     m_pins.push_back(outPin);
 }
 
-float DCPower::getOutput() {
+float DCPower::getOutputVoltage() const {
     return m_outputValue;
 }
 

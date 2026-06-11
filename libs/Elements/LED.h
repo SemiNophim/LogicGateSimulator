@@ -1,23 +1,20 @@
 #pragma once
-#include "Element.h"
+#include "LoadElement.h"
 
-class LED : public Element {
+class LED : public LoadElement {
     Q_OBJECT 
 public:
     explicit LED(QGraphicsItem *parent = nullptr);
 
-    void setValue(float value);
+    void setInputValue(int pinId, float voltage) override;
+    float getOutputValue(int pinId) const override;
 
-    float getOutput() override { return 0.0f; }
-
-    void checkInputConnection();
-    
 
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private:
-    float maxBrightness = 5.0f; 
-    float currentVoltage = 0;
+    float currentVoltage = 0.0f;
+    float thresholdVoltage = 4.8f; 
 };
 

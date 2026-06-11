@@ -16,6 +16,8 @@ set(ELEMENT_HEADERS
     Wire.h
     Pin.h
     Ground.h
+    PowerElement.h
+    LoadElement.h
 
 )
 
