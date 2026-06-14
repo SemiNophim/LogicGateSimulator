@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
+#include <QStyleOptionGraphicsItem>
 
 #include <QEvent>
 #include <QMouseEvent>
@@ -292,12 +293,29 @@ void Constructor::setupUI(){
         "  margin: 10px;"
         "}"
     ); 
+
+    previewScene = new QGraphicsScene(this);
+    previewScene->setSceneRect(-50, -50, 100, 100);
+
+    previewView = new QGraphicsView(previewScene, previewBlock);
+    previewView->setRenderHint(QPainter::Antialiasing);
+    previewView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    previewView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    previewView->setFrameShape(QFrame::NoFrame);
+    previewView->setStyleSheet("background: transparent;");
+
+    previewView->setAttribute(Qt::WA_TransparentForMouseEvents);
     
     specsBlock = new QWidget(infoSidebar);
     auto *specsLayout = new QVBoxLayout(specsBlock);
     specsLayout->setContentsMargins(15, 10, 15, 10);
-    
-    auto *specTitle = new QLabel("Кон'юнктор\nНапруга: 3.3 В\nСтрум: X.X А\nОпір: X.X Ом", specsBlock);
+
+    auto *previewLayout = new QVBoxLayout(previewBlock);
+    previewLayout->setContentsMargins(0, 0, 0, 0);
+    previewLayout->addWidget(previewView);
+
+    specTitle = new QLabel(specsBlock);
+    specTitle->setWordWrap(true);
     specTitle->setStyleSheet(
         "QLabel {"
         "  font-size: 13px;"
@@ -345,6 +363,8 @@ void Constructor::setupUI(){
     workspaceLayout->addWidget(infoSidebar);
 
     mainLayout->addWidget(workspaceWidget, 1);
+
+    resetSidebarToDefault();
 }
 
 void Constructor::setupConnections(){
@@ -392,6 +412,22 @@ void Constructor::setupConnections(){
         if (reply == QMessageBox::Yes) {
             c_scene->clear();
         }
+    });
+
+    connect(c_scene, &QGraphicsScene::selectionChanged, this, [this](){
+        QList<QGraphicsItem*> selected = c_scene->selectedItems();
+        c_scene->blockSignals(true);
+    
+        if (selected.size() == 1) {
+            if (Element* el = dynamic_cast<Element*>(selected.first())) {
+                updateSidebar(el);
+                c_scene->blockSignals(false);
+                return;
+            }
+        }
+    
+        resetSidebarToDefault();
+        c_scene->blockSignals(false);
     });
 }
 
@@ -818,8 +854,105 @@ void Constructor::runSimulation() {
             wire->setVoltage(voltage);
         }
     }
+
+    QList<QGraphicsItem*> selected = c_scene->selectedItems();
+    if (selected.size() == 1) {
+        if (Element* el = dynamic_cast<Element*>(selected.first())) {
+            updateSidebar(el);
+        }
+    }
 }
 
 void Constructor::stopSimulation() {
+}
+
+void Constructor::resetSidebarToDefault() {
+    previewScene->clear();
+    
+    QPen defaultPen(QColor("#D8DEE9"), 2, Qt::DashLine);
+    previewScene->addEllipse(-25, -25, 50, 50, defaultPen);
+    previewScene->addLine(-10, 0, 10, 0, defaultPen);
+    previewScene->addLine(0, -10, 0, 10, defaultPen);
+
+    previewView->centerOn(0, 0);
+
+    specTitle->setText("<b>Елемент не обрано</b><br><br>Оберіть компонент на схемі, щоб побачити його властивості.");
+}
+
+void Constructor::updateSidebar(Element* selectedElement) {
+    previewScene->clear();
+    
+    if (!selectedElement) {
+        resetSidebarToDefault();
+        return;
+    }
+
+    QRectF br = selectedElement->boundingRect();
+    
+    qreal scaleFactor = 6.0; 
+    int padding = c_scene->getGridSize() * 2;
+    
+    // Пропорційно збільшуємо розмір Pixmap
+    int width = static_cast<int>((br.width() + padding) * scaleFactor);
+    int height = static_cast<int>((br.height() + padding) * scaleFactor);
+    
+    QPixmap pixmap(width, height);
+    pixmap.fill(Qt::transparent);
+    
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    
+    painter.scale(scaleFactor, scaleFactor);
+    
+    painter.translate(-br.left() + padding / 2, -br.top() + padding / 2);
+    
+    QStyleOptionGraphicsItem opt;
+    selectedElement->paint(&painter, &opt, nullptr);
+    painter.end();
+
+    auto* item = previewScene->addPixmap(pixmap);
+    
+    item->setScale(1.0 / scaleFactor);
+    item->setPos(-(pixmap.width() / scaleFactor) / 2, -(pixmap.height() / scaleFactor) / 2);
+
+    previewView->resetTransform();
+    previewView->scale(1.5, 1.5);
+    
+    previewView->centerOn(0, 0);
+
+    QString typeName = "";
+    QString propertiesText = "";
+
+    switch (selectedElement->getElementType()) {
+        case ElementType::DCPower: {
+            DCPower* realPower = static_cast<DCPower*>(selectedElement);
+            typeName = "Джерело постійного струму (DC Power)";
+            propertiesText = QString("Напруга: %1 В").arg(realPower->getOutputVoltage());
+            break;
+        }
+        case ElementType::LED: {
+            typeName = "Світлодіод (LED)";
+            float currentVoltage = 0.0f;
+            if (!selectedElement->getPins().empty()) {
+                for (Wire* wire : selectedElement->getPins()[0].connectedWires) {
+                    if (wire) currentVoltage = wire->getVoltage();
+                }
+            }
+            propertiesText = QString("Поточна напруга: %1 В").arg(currentVoltage);
+            break;
+        }
+        case ElementType::Ground: {
+            typeName = "Заземлення (Ground)";
+            propertiesText = "Потенціал: 0 В";
+            break;
+        }
+        default:
+            typeName = "Компонент";
+            break;
+    }
+
+    specTitle->setText(QString("<b>%1</b><br><br>%2").arg(typeName, propertiesText));
 }
 

@@ -5,6 +5,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QLabel>
+#include <qgraphicsscene.h>
+#include <qgraphicsview.h>
 
 #include "ConstructorScheme.h"
 
@@ -44,7 +46,14 @@ private:
     QWidget *specsBlock;
     QWidget *historyBlock;
     QPushButton *undoBtn;
+
+    QLabel *specTitle;
+    QGraphicsView *previewView;
+    QGraphicsScene *previewScene;
     
+    void updateSidebar(Element* selectedElement);
+    void resetSidebarToDefault();
+
     void setupUI();
     void setupConnections();
     void setupRules();
