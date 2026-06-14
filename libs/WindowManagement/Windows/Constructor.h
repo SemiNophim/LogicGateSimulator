@@ -70,8 +70,10 @@ private:
     bool handleMousePressEvent(QMouseEvent *mouseEvent);
     bool handleMouseMoveEvent(QMouseEvent *mouseEvent);
     bool handleMouseReleaseEvent(QMouseEvent *mouseEvent);
+    bool handleKeyPressEvent(QKeyEvent *keyEvent);
 
     void handleBufferElements();
+    void deleteSelectedElements();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

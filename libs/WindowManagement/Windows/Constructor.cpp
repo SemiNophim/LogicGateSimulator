@@ -356,8 +356,10 @@ void Constructor::setupRules(){
     c_view->setRenderHint(QPainter::Antialiasing); 
     c_view->setDragMode(QGraphicsView::RubberBandDrag); 
     c_view->setTransformationAnchor(QGraphicsView::AnchorUnderMouse); 
+    c_view->setFocusPolicy(Qt::StrongFocus);
 
     c_view->viewport()->installEventFilter(this);
+    c_view->installEventFilter(this);
 }
 
 void Constructor::handleBufferElements(){
@@ -411,7 +413,7 @@ void Constructor::addGround(){
 }
 
 bool Constructor::eventFilter(QObject *obj, QEvent *event) {
-    if (obj != c_view->viewport()) {
+    if (obj != c_view && obj != c_view->viewport()) {
         return QWidget::eventFilter(obj, event);
     }
 
@@ -429,6 +431,10 @@ bool Constructor::eventFilter(QObject *obj, QEvent *event) {
     
     if (event->type() == QEvent::MouseButtonRelease) {
         return handleMouseReleaseEvent(static_cast<QMouseEvent*>(event));
+    }
+
+    if (event->type() == QEvent::KeyPress) {
+        return handleKeyPressEvent(static_cast<QKeyEvent*>(event));
     }
 
     return QWidget::eventFilter(obj, event);
@@ -449,6 +455,7 @@ bool Constructor::handleWheelEvent(QWheelEvent *wheelEvent) {
 }
 
 bool Constructor::handleMousePressEvent(QMouseEvent *mouseEvent) {
+    c_view->setFocus();
     if (mouseEvent->button() == Qt::MiddleButton) {
         c_view->setDragMode(QGraphicsView::ScrollHandDrag);
         QMouseEvent fakePress(QEvent::MouseButtonPress, 
@@ -511,7 +518,7 @@ bool Constructor::handleMousePressEvent(QMouseEvent *mouseEvent) {
                         if (m_previewWire) {
                             c_scene->removeItem(m_previewWire);
                             delete m_previewWire;
-                            m_previewWire = nullptr;
+                             m_previewWire = nullptr;
                         }
 
                         Wire *newWire = new Wire(m_selectedStartPin, closestPin);
@@ -627,10 +634,75 @@ bool Constructor::handleMouseReleaseEvent(QMouseEvent *mouseEvent) {
     return false;
 }
 
+bool Constructor::handleKeyPressEvent(QKeyEvent *keyEvent) {
+    if (keyEvent->key() == Qt::Key_Delete) {
+        deleteSelectedElements();
+        return true; 
+    }
+    
+    return false;
+}
+
+void Constructor::deleteSelectedElements() {
+    QList<QGraphicsItem*> selectedItems = c_scene->selectedItems();
+    if (selectedItems.isEmpty()) return;
+
+    std::set<Wire*> wiresToDelete;
+    std::set<Element*> elementsToDelete;
+
+    for (QGraphicsItem* item : selectedItems) {
+        if (Wire* wire = dynamic_cast<Wire*>(item)) {
+            wiresToDelete.insert(wire);
+        } 
+        else if (Element* el = dynamic_cast<Element*>(item)) {
+            elementsToDelete.insert(el);
+            
+            for (Pin& pin : el->getPins()) {
+                for (Wire* wire : pin.connectedWires) {
+                    if (wire) {
+                        wiresToDelete.insert(wire);
+                    }
+                }
+            }
+        }
+    }
+
+    for (Wire* wire : wiresToDelete) {
+        Pin* pinA = wire->startPin();
+        Pin* pinB = wire->endPin();
+
+        if (pinA) {
+            auto& req = pinA->connectedWires;
+            req.erase(std::remove(req.begin(), req.end(), wire), req.end());
+        }
+        if (pinB) {
+            auto& req = pinB->connectedWires;
+            req.erase(std::remove(req.begin(), req.end(), wire), req.end());
+        }
+
+        c_scene->removeItem(wire);
+        delete wire;
+    }
+
+    for (Element* el : elementsToDelete) {
+        c_scene->removeItem(el);
+        delete el;
+    }
+
+    runSimulation();
+}
+
 void Constructor::runSimulation() {
     for (QGraphicsItem* item : c_scene->items()) {
         if (Wire* wire = dynamic_cast<Wire*>(item)) {
-            wire->setVoltage(-1.0f);
+            wire->setVoltage(0.0f);
+        }
+        else if (LoadElement* load = dynamic_cast<LoadElement*>(item)) {
+            for (Pin& pin : load->getPins()) {
+                if (pin.type == PinType::Input) {
+                    load->setInputValue(pin.id, 0.0f);
+                }
+            }
         }
     }
 
