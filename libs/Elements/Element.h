@@ -3,6 +3,7 @@
 #include <QString>
 
 #include "Pin.h"
+#include "ElementType.h"
 
 class Element : public QGraphicsObject { 
     Q_OBJECT
@@ -16,6 +17,9 @@ public:
     const std::vector<Pin>& getPins() const { return m_pins; }
     std::vector<Pin>& getPins();
 
+
+    virtual ElementType getElementType() const = 0;
+
 protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
     
@@ -25,4 +29,13 @@ protected:
 private:
     static int m_gridSize;
 };
+
+inline QString elementTypeToString(ElementType type) {
+    switch (type) {
+        case ElementType::DCPower: return "DCPower";
+        case ElementType::LED:     return "LED";
+        case ElementType::Ground:  return "Ground";
+    }
+    return "Unknown";
+}
 

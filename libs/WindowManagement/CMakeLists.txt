@@ -12,6 +12,9 @@ set(WINDOW_SOURCES
     Windows/Lesson.cpp
     Windows/Settings/InterfaceSettings.cpp
 
+    # Saves
+    SaveManager/SaveManager.cpp
+
 )
 
 set(WINDOW_HEADERS
@@ -29,6 +32,8 @@ set(WINDOW_HEADERS
     # Languages
     LanguageManager/LangManager.h 
 
+    # Saves
+    SaveManager/SaveManager.h
 )
 
 add_library(WindowManagement ${WINDOW_SOURCES} ${WINDOW_HEADERS})

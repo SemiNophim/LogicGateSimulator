@@ -61,3 +61,9 @@ add_custom_command(TARGET LogicGateSimulator POST_BUILD
     COMMENT "Copying config files to the output directory..."
 )
 
+# Saves
+add_custom_command(TARGET LogicGateSimulator POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTPUT_DIR}/saves"
+    COMMENT "Making saves directory in output directory..."
+)
+

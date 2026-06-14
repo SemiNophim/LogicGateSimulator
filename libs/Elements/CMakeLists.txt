@@ -18,6 +18,7 @@ set(ELEMENT_HEADERS
     Ground.h
     PowerElement.h
     LoadElement.h
+    ElementType.h
 
 )
 

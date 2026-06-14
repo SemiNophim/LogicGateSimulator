@@ -13,6 +13,8 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
+    ElementType getElementType() const override { return ElementType::LED; }
+
 private:
     float currentVoltage = 0.0f;
     float thresholdVoltage = 4.8f; 

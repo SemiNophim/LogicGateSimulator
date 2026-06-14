@@ -30,6 +30,9 @@
 #include "PowerElement.h"
 #include "LoadElement.h"
 
+#include "SaveManager/SaveManager.h"
+#include <QFileDialog>
+
 Constructor::Constructor(QWidget *parent) : QWidget(parent){
     setupUI();
     setupConnections();
@@ -350,6 +353,34 @@ void Constructor::setupConnections(){
             this, &Constructor::runSimulation);
     connect(stopSimBtn, &QPushButton::clicked,
             this, &Constructor::stopSimulation);
+
+    connect(saveProjectBtn, &QPushButton::clicked, this, [this](){
+        QString savesPath = QCoreApplication::applicationDirPath() + "/saves";
+
+        QString filePath = QFileDialog::getSaveFileName(this, 
+        tr("Save Circuit Project"), savesPath, tr("Circuit Files (*.json)"));
+        
+        if (!filePath.isEmpty()) {
+            if (!filePath.endsWith(".json", Qt::CaseInsensitive)) {
+                filePath += ".json";
+            }
+            bool success = SaveManager::saveProject(filePath, c_scene);
+        }
+    });
+
+    connect(openProjectBtn, &QPushButton::clicked, this, [this](){
+        QString savesPath = QCoreApplication::applicationDirPath() + "/saves";
+    
+        QString filePath = QFileDialog::getOpenFileName(this, 
+            tr("Open Circuit Project"), savesPath, tr("Circuit Files (*.json)"));
+        
+        if (!filePath.isEmpty()) {
+            bool success = SaveManager::loadProject(filePath, c_scene);
+            if (success) {
+                runSimulation(); 
+            } else {}
+        }
+    });
 }
 
 void Constructor::setupRules(){
