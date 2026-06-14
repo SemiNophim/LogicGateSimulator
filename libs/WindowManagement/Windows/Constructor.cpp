@@ -19,6 +19,8 @@
 
 #include <queue>
 #include <set>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "Constructor.h"
 #include "LanguageManager/LangManager.h"
@@ -31,7 +33,6 @@
 #include "LoadElement.h"
 
 #include "SaveManager/SaveManager.h"
-#include <QFileDialog>
 
 Constructor::Constructor(QWidget *parent) : QWidget(parent){
     setupUI();
@@ -379,6 +380,17 @@ void Constructor::setupConnections(){
             if (success) {
                 runSimulation(); 
             } else {}
+        }
+    });
+
+    connect(newProjectBtn, &QPushButton::clicked, this, [this](){
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, 
+                "Попередження", "Ви дійсно хочете створити новий проект, якщо ви натиснете так, то ваш поточний прогрес буде втрачено.",
+                QMessageBox::Yes | QMessageBox::No);
+
+        if (reply == QMessageBox::Yes) {
+            c_scene->clear();
         }
     });
 }
